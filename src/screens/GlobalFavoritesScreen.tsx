@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
@@ -6,7 +7,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { SearchBar } from '@/components/search-bar';
 import { useProducts } from '@/hooks/useProducts';
+import { useProductSearch } from '@/hooks/useProductSearch';
 import { Product } from '@/types/product';
 import { Spacing } from '@/constants/theme';
 import { RootStackParamList } from '@/navigation/RootNavigator';
@@ -16,10 +19,13 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 export default function GlobalFavoritesScreen() {
   const { data: products, isLoading } = useProducts();
   const navigation = useNavigation<NavigationProp>();
+  const [search, setSearch] = useState('');
 
   const sorted = products
     ? [...products].sort((a, b) => b.rating.rate - a.rating.rate)
     : [];
+
+  const filtered = useProductSearch(sorted, search);
 
   const renderItem = ({ item }: { item: Product }) => (
     <Pressable
@@ -48,11 +54,17 @@ export default function GlobalFavoritesScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SearchBar value={search} onChangeText={setSearch} />
       <FlatList
-        data={sorted}
+        data={filtered}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <ThemedText style={styles.emptyText}>
+            No products match your search.
+          </ThemedText>
+        }
       />
     </SafeAreaView>
   );
@@ -98,5 +110,9 @@ const styles = StyleSheet.create({
   },
   rating: {
     fontSize: 12,
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: Spacing.five,
   },
 });

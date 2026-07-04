@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
@@ -6,8 +7,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { SearchBar } from '@/components/search-bar';
 import { useFavoritesStore } from '@/store/useFavoritesStore';
 import { useProducts } from '@/hooks/useProducts';
+import { useProductSearch } from '@/hooks/useProductSearch';
 import { Product } from '@/types/product';
 import { Spacing } from '@/constants/theme';
 import { RootStackParamList } from '@/navigation/RootNavigator';
@@ -18,8 +21,10 @@ export default function UserFavoritesScreen() {
   const favorites = useFavoritesStore((s) => s.favorites);
   const { data: products } = useProducts();
   const navigation = useNavigation<NavigationProp>();
+  const [search, setSearch] = useState('');
 
   const favoriteProducts = products?.filter((p) => favorites.includes(p.id)) ?? [];
+  const filtered = useProductSearch(favoriteProducts, search);
 
   const renderItem = ({ item }: { item: Product }) => (
     <Pressable
@@ -35,7 +40,7 @@ export default function UserFavoritesScreen() {
     </Pressable>
   );
 
-  if (favoriteProducts.length === 0) {
+  if (favoriteProducts.length === 0 && !search) {
     return (
       <ThemedView style={styles.center}>
         <ThemedText>No favorites yet.</ThemedText>
@@ -45,11 +50,17 @@ export default function UserFavoritesScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SearchBar value={search} onChangeText={setSearch} />
       <FlatList
-        data={favoriteProducts}
+        data={filtered}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <ThemedText style={styles.emptyText}>
+            {search ? 'No products match your search.' : 'No favorites yet.'}
+          </ThemedText>
+        }
       />
     </SafeAreaView>
   );
@@ -92,5 +103,9 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: Spacing.five,
   },
 });
