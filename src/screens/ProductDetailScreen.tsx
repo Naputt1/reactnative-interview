@@ -1,7 +1,7 @@
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { Image } from "expo-image";
 
-import { Pressable, ScrollView, StyleSheet } from "react-native";
+import { Pressable, ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -24,7 +24,7 @@ type ProductDetailRouteProp = RouteProp<RootStackParamList, "ProductDetail">;
 export default function ProductDetailScreen() {
   const route = useRoute<ProductDetailRouteProp>();
   const { id } = route.params;
-  const { data: product, isLoading } = useProduct(id);
+  const { data: product, isLoading, isError, error, refetch } = useProduct(id);
   const favorites = useFavoritesStore((s) => s.favorites);
   const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite);
   const theme = useTheme();
@@ -35,6 +35,17 @@ export default function ProductDetailScreen() {
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
   }));
+
+  if (isError) {
+    return (
+      <ThemedView style={styles.center}>
+        <ThemedText>{error?.message || "Failed to load product."}</ThemedText>
+        <TouchableOpacity onPress={() => refetch()} style={styles.retryButton}>
+          <ThemedText style={styles.retryText}>Try Again</ThemedText>
+        </TouchableOpacity>
+      </ThemedView>
+    );
+  }
 
   if (isLoading || !product) {
     return (
@@ -116,6 +127,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: Spacing.four,
+    gap: Spacing.three,
+  },
+  retryButton: {
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.three,
+    borderRadius: Spacing.two,
+    borderWidth: 1,
+    borderColor: "currentColor",
+  },
+  retryText: {
+    fontWeight: "600",
   },
   content: {
     padding: Spacing.four,

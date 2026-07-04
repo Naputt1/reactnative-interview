@@ -12,7 +12,7 @@ import { RootStackParamList } from '@/navigation/RootNavigator';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function GlobalFavoritesScreen() {
-  const { data: products, isLoading } = useProducts();
+  const { data: products, isLoading, isError, error, refetch } = useProducts();
   const navigation = useNavigation<NavigationProp>();
   const [search, setSearch] = useState('');
 
@@ -26,6 +26,9 @@ export default function GlobalFavoritesScreen() {
     <ProductList
       data={filtered}
       isLoading={isLoading}
+      isError={isError}
+      errorMessage={error?.message}
+      onRetry={refetch}
       searchValue={search}
       onSearchChange={setSearch}
       renderItem={({ item }: { item: Product }) => (

@@ -12,7 +12,7 @@ import { RootStackParamList } from '@/navigation/RootNavigator';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function ProductsScreen() {
-  const { data: products, isLoading, refetch, isRefetching } = useProducts();
+  const { data: products, isLoading, isError, error, refetch, isRefetching } = useProducts();
   const navigation = useNavigation<NavigationProp>();
   const [search, setSearch] = useState('');
   const filtered = useProductSearch(products, search);
@@ -21,6 +21,9 @@ export default function ProductsScreen() {
     <ProductList
       data={filtered}
       isLoading={isLoading}
+      isError={isError}
+      errorMessage={error?.message}
+      onRetry={refetch}
       searchValue={search}
       onSearchChange={setSearch}
       onRefresh={refetch}

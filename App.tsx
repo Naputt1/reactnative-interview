@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { ErrorBoundary } from '@/components/error-boundary';
 import { RootNavigator } from '@/navigation/RootNavigator';
 
 SplashScreen.preventAutoHideAsync();
@@ -15,11 +16,13 @@ export default function App() {
   const theme = colorScheme === 'dark' ? DarkTheme : DefaultTheme;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <NavigationContainer theme={theme}>
-        <AnimatedSplashOverlay />
-        <RootNavigator />
-      </NavigationContainer>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <NavigationContainer theme={theme}>
+          <AnimatedSplashOverlay />
+          <RootNavigator />
+        </NavigationContainer>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }

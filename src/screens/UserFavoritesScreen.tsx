@@ -17,14 +17,14 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function UserFavoritesScreen() {
   const favorites = useFavoritesStore((s) => s.favorites);
-  const { data: products } = useProducts();
+  const { data: products, isLoading, isError, error, refetch } = useProducts();
   const navigation = useNavigation<NavigationProp>();
   const [search, setSearch] = useState('');
 
   const favoriteProducts = products?.filter((p) => favorites.includes(p.id)) ?? [];
   const filtered = useProductSearch(favoriteProducts, search);
 
-  if (favoriteProducts.length === 0 && !search) {
+  if (!isLoading && !isError && favoriteProducts.length === 0 && !search) {
     return (
       <ThemedView style={styles.center}>
         <ThemedText>No favorites yet.</ThemedText>
@@ -35,6 +35,10 @@ export default function UserFavoritesScreen() {
   return (
     <ProductList
       data={filtered}
+      isLoading={isLoading}
+      isError={isError}
+      errorMessage={error?.message}
+      onRetry={refetch}
       searchValue={search}
       onSearchChange={setSearch}
       emptyMessage={

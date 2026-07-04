@@ -1,4 +1,4 @@
-import { FlatList, RefreshControl, StyleSheet } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from './themed-text';
@@ -10,6 +10,9 @@ import { Spacing } from '@/constants/theme';
 interface ProductListProps {
   data: Product[];
   isLoading?: boolean;
+  isError?: boolean;
+  errorMessage?: string;
+  onRetry?: () => void;
   refreshing?: boolean;
   emptyMessage?: string;
   searchValue: string;
@@ -22,6 +25,9 @@ interface ProductListProps {
 export function ProductList({
   data,
   isLoading,
+  isError,
+  errorMessage,
+  onRetry,
   refreshing,
   emptyMessage = 'No products found.',
   searchValue,
@@ -30,6 +36,19 @@ export function ProductList({
   renderItem,
   loadingMessage = 'Loading...',
 }: ProductListProps) {
+  if (isError) {
+    return (
+      <ThemedView style={styles.center}>
+        <ThemedText style={styles.errorText}>{errorMessage || 'Something went wrong'}</ThemedText>
+        {onRetry && (
+          <Pressable onPress={onRetry} style={styles.retryButton}>
+            <ThemedText style={styles.retryText}>Try Again</ThemedText>
+          </Pressable>
+        )}
+      </ThemedView>
+    );
+  }
+
   if (isLoading) {
     return (
       <ThemedView style={styles.center}>
@@ -75,5 +94,19 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
     marginTop: Spacing.five,
+  },
+  errorText: {
+    textAlign: 'center',
+    marginBottom: Spacing.three,
+  },
+  retryButton: {
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.three,
+    borderRadius: Spacing.two,
+    borderWidth: 1,
+    borderColor: 'currentColor',
+  },
+  retryText: {
+    fontWeight: '600',
   },
 });
