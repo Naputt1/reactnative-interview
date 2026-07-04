@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet } from 'react-native';
+import { FlatList, RefreshControl, Pressable, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -19,7 +19,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function UserFavoritesScreen() {
   const favorites = useFavoritesStore((s) => s.favorites);
-  const { data: products } = useProducts();
+  const { data: products, refetch, isRefetching } = useProducts();
   const navigation = useNavigation<NavigationProp>();
   const [search, setSearch] = useState('');
 
@@ -56,6 +56,9 @@ export default function UserFavoritesScreen() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+        }
         ListEmptyComponent={
           <ThemedText style={styles.emptyText}>
             {search ? 'No products match your search.' : 'No favorites yet.'}

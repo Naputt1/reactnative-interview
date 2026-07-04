@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet } from 'react-native';
+import { FlatList, RefreshControl, Pressable, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,7 +17,7 @@ import { RootStackParamList } from '@/navigation/RootNavigator';
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 export default function GlobalFavoritesScreen() {
-  const { data: products, isLoading } = useProducts();
+  const { data: products, isLoading, refetch, isRefetching } = useProducts();
   const navigation = useNavigation<NavigationProp>();
   const [search, setSearch] = useState('');
 
@@ -60,6 +60,9 @@ export default function GlobalFavoritesScreen() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
+        }
         ListEmptyComponent={
           <ThemedText style={styles.emptyText}>
             No products match your search.
