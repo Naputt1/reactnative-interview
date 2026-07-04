@@ -33,7 +33,8 @@ export function TabNavigator() {
           tabBarIcon: ({ color }) => (
             <Image
               source={require('@/assets/images/tabIcons/home.png')}
-              style={{ width: 24, height: 24, tintColor: color }}
+              style={{ width: 24, height: 24 }}
+              tintColor={color}
             />
           ),
         }}
@@ -46,7 +47,8 @@ export function TabNavigator() {
           tabBarIcon: ({ color }) => (
             <Image
               source={require('@/assets/images/tabIcons/explore.png')}
-              style={{ width: 24, height: 24, tintColor: color }}
+              style={{ width: 24, height: 24 }}
+              tintColor={color}
             />
           ),
         }}
@@ -59,7 +61,8 @@ export function TabNavigator() {
           tabBarIcon: ({ color }) => (
             <Image
               source={require('@/assets/images/tabIcons/explore.png')}
-              style={{ width: 24, height: 24, tintColor: color }}
+              style={{ width: 24, height: 24 }}
+              tintColor={color}
             />
           ),
         }}
