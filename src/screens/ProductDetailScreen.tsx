@@ -1,17 +1,25 @@
-import { StyleSheet, Pressable, ScrollView } from 'react-native';
-import { Image } from 'expo-image';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { RouteProp, useRoute } from "@react-navigation/native";
+import { Image } from "expo-image";
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { useProduct } from '@/hooks/useProduct';
-import { useFavoritesStore } from '@/store/useFavoritesStore';
-import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-import { RootStackParamList } from '@/navigation/RootNavigator';
+import { Pressable, ScrollView, StyleSheet } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-type ProductDetailRouteProp = RouteProp<RootStackParamList, 'ProductDetail'>;
+import { ThemedText } from "@/components/themed-text";
+import { ThemedView } from "@/components/themed-view";
+import { Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
+import { useProduct } from "@/hooks/useProduct";
+import { RootStackParamList } from "@/navigation/RootNavigator";
+import { useFavoritesStore } from "@/store/useFavoritesStore";
+
+type ProductDetailRouteProp = RouteProp<RootStackParamList, "ProductDetail">;
 
 export default function ProductDetailScreen() {
   const route = useRoute<ProductDetailRouteProp>();
@@ -21,6 +29,13 @@ export default function ProductDetailScreen() {
   const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite);
   const theme = useTheme();
 
+  const favorited = product ? favorites.includes(product.id) : false;
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
   if (isLoading || !product) {
     return (
       <ThemedView style={styles.center}>
@@ -29,10 +44,21 @@ export default function ProductDetailScreen() {
     );
   }
 
-  const favorited = favorites.includes(product.id);
+  const handleToggle = () => {
+    if (!favorited) {
+      scale.value = withSequence(
+        withTiming(0.8, { duration: 0 }),
+        withSpring(1.3, { damping: 8, stiffness: 100 }),
+        withSpring(1),
+      );
+    } else {
+      scale.value = withTiming(1, { duration: 0 });
+    }
+    toggleFavorite(product.id);
+  };
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container} edges={["bottom"]}>
       <ScrollView contentContainerStyle={styles.content}>
         <Image source={{ uri: product.image }} style={styles.image} />
 
@@ -54,28 +80,28 @@ export default function ProductDetailScreen() {
         </ThemedView>
 
         <Pressable
-          onPress={() => toggleFavorite(product.id)}
+          onPress={handleToggle}
           style={({ pressed }) => [
             styles.favoriteButton,
             {
-              backgroundColor: favorited
-                ? theme.text
-                : theme.backgroundElement,
+              backgroundColor: favorited ? theme.text : theme.backgroundElement,
               borderColor: theme.text,
             },
             pressed && { opacity: 0.7 },
-          ]}>
-          <ThemedText
-            style={[
-              styles.favoriteButtonText,
-              {
-                color: favorited
-                  ? theme.background
-                  : theme.text,
-              },
-            ]}>
-            {favorited ? '❤️ Favorited' : '♡ Add to Favorites'}
-          </ThemedText>
+          ]}
+        >
+          <Animated.View style={animatedStyle}>
+            <ThemedText
+              style={[
+                styles.favoriteButtonText,
+                {
+                  color: favorited ? theme.background : theme.text,
+                },
+              ]}
+            >
+              {favorited ? "❤️ Favorited" : "♡ Add to Favorites"}
+            </ThemedText>
+          </Animated.View>
         </Pressable>
       </ScrollView>
     </SafeAreaView>
@@ -88,33 +114,33 @@ const styles = StyleSheet.create({
   },
   center: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   content: {
     padding: Spacing.four,
     gap: Spacing.four,
   },
   image: {
-    width: '100%',
+    width: "100%",
     height: 300,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   section: {
     gap: Spacing.two,
   },
   category: {
     fontSize: 12,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 1,
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   price: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   rating: {
     fontSize: 14,
@@ -126,11 +152,11 @@ const styles = StyleSheet.create({
   favoriteButton: {
     paddingVertical: Spacing.three,
     borderRadius: Spacing.three,
-    alignItems: 'center',
+    alignItems: "center",
     borderWidth: 1,
   },
   favoriteButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
