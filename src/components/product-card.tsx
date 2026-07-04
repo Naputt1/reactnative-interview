@@ -17,7 +17,7 @@ export function ProductCard({ product, onPress, showRating }: ProductCardProps) 
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}>
-      <Image source={{ uri: product.image }} style={styles.image} />
+      <Image source={{ uri: product.image }} style={styles.image} cachePolicy="memory-disk" transition={300} />
       <ThemedView style={styles.cardContent}>
         <ThemedText numberOfLines={2} style={styles.title}>
           {product.title}

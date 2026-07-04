@@ -71,7 +71,7 @@ export default function ProductDetailScreen() {
   return (
     <SafeAreaView style={styles.container} edges={["bottom"]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Image source={{ uri: product.image }} style={styles.image} />
+        <Image source={{ uri: product.image }} style={styles.image} cachePolicy="memory-disk" transition={300} />
 
         <ThemedView style={styles.section}>
           <ThemedText style={styles.category}>{product.category}</ThemedText>
