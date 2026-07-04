@@ -1,17 +1,12 @@
 import { useState } from 'react';
-import { FlatList, RefreshControl, Pressable, StyleSheet } from 'react-native';
-import { Image } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { SearchBar } from '@/components/search-bar';
+import { ProductCard } from '@/components/product-card';
+import { ProductList } from '@/components/product-list';
 import { useProducts } from '@/hooks/useProducts';
 import { useProductSearch } from '@/hooks/useProductSearch';
 import { Product } from '@/types/product';
-import { Spacing } from '@/constants/theme';
 import { RootStackParamList } from '@/navigation/RootNavigator';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
@@ -22,89 +17,22 @@ export default function ProductsScreen() {
   const [search, setSearch] = useState('');
   const filtered = useProductSearch(products, search);
 
-  const renderItem = ({ item }: { item: Product }) => (
-    <Pressable
-      onPress={() => navigation.navigate('ProductDetail', { id: item.id })}
-      style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}>
-      <Image source={{ uri: item.image }} style={styles.image} />
-      <ThemedView style={styles.cardContent}>
-        <ThemedText numberOfLines={2} style={styles.title}>
-          {item.title}
-        </ThemedText>
-        <ThemedText style={styles.price}>${item.price.toFixed(2)}</ThemedText>
-      </ThemedView>
-    </Pressable>
-  );
-
-  if (isLoading) {
-    return (
-      <ThemedView style={styles.center}>
-        <ThemedText>Loading products...</ThemedText>
-      </ThemedView>
-    );
-  }
-
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <SearchBar value={search} onChangeText={setSearch} />
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
-        refreshControl={
-          <RefreshControl refreshing={isRefetching} onRefresh={refetch} />
-        }
-        ListEmptyComponent={
-          <ThemedText style={styles.emptyText}>
-            No products match your search.
-          </ThemedText>
-        }
-      />
-    </SafeAreaView>
+    <ProductList
+      data={filtered}
+      isLoading={isLoading}
+      searchValue={search}
+      onSearchChange={setSearch}
+      onRefresh={refetch}
+      refreshing={isRefetching}
+      loadingMessage="Loading products..."
+      emptyMessage="No products match your search."
+      renderItem={({ item }: { item: Product }) => (
+        <ProductCard
+          product={item}
+          onPress={() => navigation.navigate('ProductDetail', { id: item.id })}
+        />
+      )}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  list: {
-    padding: Spacing.three,
-    gap: Spacing.three,
-  },
-  card: {
-    flexDirection: 'row',
-    borderRadius: Spacing.three,
-    overflow: 'hidden',
-  },
-  cardPressed: {
-    opacity: 0.7,
-  },
-  cardContent: {
-    flex: 1,
-    padding: Spacing.three,
-    justifyContent: 'space-between',
-  },
-  image: {
-    width: 100,
-    height: 120,
-    resizeMode: 'contain',
-  },
-  title: {
-    fontSize: 14,
-  },
-  price: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  emptyText: {
-    textAlign: 'center',
-    marginTop: Spacing.five,
-  },
-});
